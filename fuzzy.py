@@ -5,50 +5,51 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # Required for 3D plotting
 
 # Generate universe variables
-lin_exe_dur = ctrl.Antecedent(np.arange(0, 1, 0.01), 'linear_execution_duration')
-parr_exe_dur = ctrl.Antecedent(np.arange(0,1,0.01), 'parallel_execution_duration')
-data_size_in = ctrl.Antecedent(np.arange(0,1,0.01), 'data_size_in')
-data_size_out = ctrl.Antecedent(np.arange(0,1,0.01), 'data_size_out')
-net_latency = ctrl.Antecedent(np.arange(0,1,0.01), 'network_latency')
-net_bandwidth = ctrl.Antecedent(np.arange(0,1,0.01), 'network_bandwidth')
-realtime_priority = ctrl.Antecedent(np.arange(0,1,0.01), 'realtime_priority')
-req_other_info = ctrl.Antecedent(np.arange(0,1,0.01), 'req_other_info')
+lin_exe_dur = ctrl.Antecedent(np.arange(0, 60000, 0.01), 'linear_execution_duration')	# Milliseconds
+parr_exe_dur = ctrl.Antecedent(np.arange(0,60000, 0.01), 'parallel_execution_duration') # Milliseconds
+data_size_in = ctrl.Antecedent(np.arange(0,30,0.01), 'data_size_in')			# Megabytes
+data_throughput_in = ctrl.Antecedent(np.arange(0,2500,0.01), 'data_throughput_in')	# Megabits per second
+data_throughput_out = ctrl.Antecedent(np.arange(0,2500,0.01), 'data_throughput_out')	# Megabits per second
+net_latency = ctrl.Antecedent(np.arange(0,500,0.01), 'network_latency')			# Milliseconds
+net_bandwidth = ctrl.Antecedent(np.arange(0,1000,0.01), 'network_bandwidth')		# Megabits Per Seconds
+realtime_priority = ctrl.Antecedent(np.arange(0,1,0.0001), 'realtime_priority')		# Human chosen value from 0-1, where 1 mean requires real time feedback
+req_other_info = ctrl.Antecedent(np.arange(0,1,0.01), 'req_other_info')			# Binary 0 or 1 for if it requires other's info
 
-cloud = ctrl.Consequent(np.arange(0, 1, 0.01), 'cloud')
-edge = ctrl.Consequent(np.arange(0, 1, 0.01), 'edge')
-end_device = ctrl.Consequent(np.arange(0, 1, 0.01), 'end_device')
+cloud = ctrl.Consequent(np.arange(0, 1, 0.01), 'cloud')					# Probablity from 0-1 that container should be on the cloud
+edge = ctrl.Consequent(np.arange(0, 1, 0.01), 'edge')					# Probablity from 0-1 that container should be on the edge
+end_device = ctrl.Consequent(np.arange(0, 1, 0.01), 'end_device')			# Probablity from 0-1 that container should be on the end device
 
 # Generate fuzzy membership functions
-lin_exe_dur['low'] = fuzz.trapmf(lin_exe_dur.universe, [0, 0, .25,.5])
-lin_exe_dur['medium'] = fuzz.gaussmf(lin_exe_dur.universe, 0.5,0.15)
-lin_exe_dur['high'] = fuzz.trapmf(lin_exe_dur.universe, [0.5, 0.75,1.0,1.0])
+lin_exe_dur['low'] = fuzz.trapmf(lin_exe_dur.universe, [0, 0, 200, 400])
+lin_exe_dur['medium'] = fuzz.gaussmf(lin_exe_dur.universe, 500, 100)
+lin_exe_dur['high'] = fuzz.trapmf(lin_exe_dur.universe, [600, 1000, 60000, 60000])
 
-parr_exe_dur['low'] = fuzz.trapmf(parr_exe_dur.universe, [0, 0, .25,.5])
-parr_exe_dur['medium'] = fuzz.gaussmf(parr_exe_dur.universe, 0.5,0.15)
-parr_exe_dur['high'] = fuzz.trapmf(parr_exe_dur.universe, [0.5, 0.75,1.0,1.0])
+parr_exe_dur['low'] = fuzz.trapmf(parr_exe_dur.universe, [0, 0, 200, 400])
+parr_exe_dur['medium'] = fuzz.gaussmf(parr_exe_dur.universe, 500, 100)
+parr_exe_dur['high'] = fuzz.trapmf(parr_exe_dur.universe, [600, 1000, 60000, 60000])
 
-data_size_in['low'] = fuzz.trapmf(data_size_in.universe, [0, 0, .25,.5])
-data_size_in['medium'] = fuzz.gaussmf(data_size_in.universe, 0.5,0.15)
-data_size_in['high'] = fuzz.trapmf(data_size_in.universe, [0.5, 0.75,1.0,1.0])
+data_throughput_in['low'] = fuzz.trapmf(data_throughput_in.universe, [0, 0, 40,120])
+data_throughput_in['medium'] = fuzz.gaussmf(data_throughput_in.universe, 250,100)
+data_throughput_in['high'] = fuzz.trapmf(data_throughput_in.universe, [400, 800,2500,2500])
 
-data_size_out['low'] = fuzz.trapmf(data_size_out.universe, [0, 0, .25,.5])
-data_size_out['medium'] = fuzz.gaussmf(data_size_out.universe, 0.5,0.15)
-data_size_out['high'] = fuzz.trapmf(data_size_out.universe, [0.5, 0.75,1.0,1.0])
+data_throughput_out['low'] = fuzz.trapmf(data_throughput_out.universe, [0, 0, 40, 120])
+data_throughput_out['medium'] = fuzz.gaussmf(data_throughput_out.universe, 250, 100)
+data_throughput_out['high'] = fuzz.trapmf(data_throughput_out.universe, [400,800,2500,2500])
 
-net_latency['low'] = fuzz.trapmf(net_latency.universe, [0, 0, .25,.5])
-net_latency['medium'] = fuzz.gaussmf(net_latency.universe, 0.5,0.15)
-net_latency['high'] = fuzz.trapmf(net_latency.universe, [0.5, 0.75,1.0,1.0])
+net_latency['low'] = fuzz.trapmf(net_latency.universe, [0, 0, 25, 50])
+net_latency['medium'] = fuzz.gaussmf(net_latency.universe, 75, 25)
+net_latency['high'] = fuzz.trapmf(net_latency.universe, [100, 200,500,500])
 
-net_bandwidth['low'] = fuzz.trapmf(net_bandwidth.universe, [0, 0, .25,.5])
-net_bandwidth['medium'] = fuzz.gaussmf(net_bandwidth.universe, 0.5,0.15)
-net_bandwidth['high'] = fuzz.trapmf(net_bandwidth.universe, [0.5, 0.75,1.0,1.0])
+net_bandwidth['low'] = fuzz.trapmf(net_bandwidth.universe, [0, 0, 25,75])
+net_bandwidth['medium'] = fuzz.gaussmf(net_bandwidth.universe, 150,25)
+net_bandwidth['high'] = fuzz.trapmf(net_bandwidth.universe, [200, 300,1000,1000])
 
 realtime_priority['low'] = fuzz.trapmf(realtime_priority.universe, [0, 0, .25,.5])
 realtime_priority['medium'] = fuzz.gaussmf(realtime_priority.universe, 0.5,0.15)
 realtime_priority['high'] = fuzz.trapmf(realtime_priority.universe, [0.5, 0.75,1.0,1.0])
 
-req_other_info['no'] = fuzz.trapmf(req_other_info.universe, [0, 0, 0.5000,0.5000])
-req_other_info ['yes'] = fuzz.trapmf(req_other_info.universe, [0.5000, 0.5000,1.0,1.0])
+req_other_info['no'] = fuzz.trapmf(req_other_info.universe, [0, 0, 0.500,0.500])
+req_other_info ['yes'] = fuzz.trapmf(req_other_info.universe, [0.500, 0.500,1.0,1.0])
 
 cloud['low'] = fuzz.trapmf(cloud.universe, [0, 0, .25,.5])
 cloud['medium'] = fuzz.gaussmf(cloud.universe, 0.5,0.15)
@@ -63,10 +64,18 @@ end_device['medium'] = fuzz.gaussmf(end_device.universe, 0.5,0.15)
 end_device['high'] = fuzz.trapmf(end_device.universe, [0.5, 0.75,1.0,1.0])
 
 # Visualize these universes and membership functions
-lin_exe_dur.view()
-req_other_info.view()
-#comments.view()
-#popularity.view()
+#lin_exe_dur.view()
+#parr_exe_dur.view()
+#req_other_info.view()
+#data_throughput_in.view()
+#data_throughput_out.view()
+#net_latency.view()
+#net_bandwidth.view()
+#realtime_priority.view()
+#req_other_info.view()
+#cloud.view()
+#edge.view()
+#end_device.view()
 plt.show()
 
 # Define the Rule Set
